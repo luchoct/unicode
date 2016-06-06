@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.luchoct.unicode;
 
@@ -10,29 +10,28 @@ import com.lexicalscope.jewel.cli.Unparsed;
 
 /**
  * @author Luis
- *
  */
 public class UnicodeAppInput {
-  
-  private List<String> characters;
 
-  private Boolean help;
+	private List<String> characters;
 
-  public List<String> getCharacters() {
-    return characters;
-  }
+	private Boolean help;
 
-  @Unparsed(name = "characters")
-  public final void setCharacters(final List<String> newCharacters) {
-    characters = newCharacters;
-  }
+	public List<String> getCharacters() {
+		return characters;
+	}
 
-  public final Boolean getHelp() {
-    return help;
-  }
+	@Unparsed(name = "characters")
+	public final void setCharacters(final List<String> newCharacters) {
+		characters = newCharacters;
+	}
 
-  @Option(helpRequest = true, description = "Display help", shortName = "h", longName = "help", defaultToNull = true)
-  public final void setShowHelp(final Boolean help) {
-    this.help = help;
-  }
+	public final Boolean getHelp() {
+		return help;
+	}
+
+	@Option(helpRequest = true, description = "Display help", shortName = "h", longName = "help", defaultToNull = true)
+	public final void setShowHelp(final Boolean help) {
+		this.help = help;
+	}
 }

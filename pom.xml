@@ -5,16 +5,16 @@
 	<artifactId>unicode</artifactId>
 	<packaging>jar</packaging>
 	<name>Unicode APP</name>
-	<version>1.0</version>
+	<version>1.1</version>
 
 	<properties>
 		<encoding>UTF-8</encoding>
 		<junitVersion>4.10</junitVersion>
-		<checkstylePluginVersion>2.5</checkstylePluginVersion>
-		<pmdPluginVersion>2.5</pmdPluginVersion>
-		<coberturaPluginVersion>2.5.2</coberturaPluginVersion>
-		<surefirePluginVersion>2.7.2</surefirePluginVersion>
-		<jdkVersion>1.6</jdkVersion>
+		<checkstylePluginVersion>2.17</checkstylePluginVersion>
+		<pmdPluginVersion>3.6</pmdPluginVersion>
+		<jacocoPluginVersion>0.7.6.201602180812</jacocoPluginVersion>
+		<surefirePluginVersion>2.10</surefirePluginVersion>
+		<jdkVersion>1.8</jdkVersion>
 	</properties>
 
 	<build>
@@ -22,6 +22,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.5.1</version>
 				<configuration>
 					<encoding>${encoding}</encoding>
 					<source>${jdkVersion}</source>
@@ -33,17 +34,13 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>${surefirePluginVersion}</version>
 				<configuration>
-					<systemPropertyVariables>
-						<net.sourceforge.cobertura.datafile>target/cobertura/cobertura.ser</net.sourceforge.cobertura.datafile>
-					</systemPropertyVariables>
-					<!-- for JDK6 Support -->
-					<argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true</argLine>
+					<argLine>${surefireArgLine}</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.5</version>
+				<version>3.0.0</version>
 				<configuration>
 					<encoding>${encoding}</encoding>
 				</configuration>
@@ -51,52 +48,24 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>2.0.1</version>
+				<version>3.5.1</version>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>${coberturaPluginVersion}</version>
-				<configuration>
-					<check>
-						<haltOnFailure>false</haltOnFailure>
-						<branchRate>85</branchRate>
-						<lineRate>85</lineRate>
-						<totalBranchRate>85</totalBranchRate>
-						<totalLineRate>85</totalLineRate>
-						<packageLineRate>85</packageLineRate>
-						<packageBranchRate>85</packageBranchRate>
-						<regexes>
-							<regex>
-								<pattern>com.luchoct.unicode.*</pattern>
-								<branchRate>80</branchRate>
-								<lineRate>80</lineRate>
-							</regex>
-						</regexes>
-					</check>
-					<instrumentation>
-						<includes>
-							<include>com/luchoct/unicode/**/*.class</include>
-						</includes>
-					</instrumentation>
-				</configuration>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacocoPluginVersion}</version>
 				<executions>
 					<execution>
-						<id>clean</id>
-						<phase>pre-site</phase>
+						<id>default-prepare-agent</id>
 						<goals>
-							<goal>clean</goal>
+							<goal>prepare-agent</goal>
 						</goals>
-					</execution>
-					<execution>
-						<id>instrument</id>
-						<phase>site</phase>
-						<goals>
-							<goal>cobertura</goal>
-						</goals>
+						<configuration>
+							<destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
+							<propertyName>surefireArgLine</propertyName>
+						</configuration>
 					</execution>
 				</executions>
-
 			</plugin>
 		</plugins>
 	</build>
@@ -104,11 +73,36 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.9</version>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacocoPluginVersion}</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>report</report>
+						</reports>
+						<configuration>
+							<dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
+						</configuration>
+					</reportSet>
+				</reportSets>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-pmd-plugin</artifactId>
 				<version>${pmdPluginVersion}</version>
 				<configuration>
 					<targetJdk>${jdkVersion}</targetJdk>
-					<linkXref>true</linkXref>
+					<skipPmdError>false</skipPmdError>
+					<skipEmptyReport>false</skipEmptyReport>
+					<includeTests>true</includeTests>
+					<rulesets>
+						<ruleset>${basedir}/src/main/resources/pmdConfiguration.xml</ruleset>
+					</rulesets>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -117,27 +111,23 @@
 				<version>${checkstylePluginVersion}</version>
 				<configuration>
 					<configLocation>${basedir}/src/main/resources/checkstyleConfiguration.xml</configLocation>
+					<includeTestSourceDirectory>true</includeTestSourceDirectory>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jxr-plugin</artifactId>
-				<version>2.2</version>
+				<version>2.5</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.8</version>
+				<version>2.10.3</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>${surefirePluginVersion}</version>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>${coberturaPluginVersion}</version>
+				<version>2.19.1</version>
 			</plugin>
 		</plugins>
 	</reporting>
